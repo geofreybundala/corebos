@@ -7,7 +7,9 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  ********************************************************************************/
-$app_strings = array(
+$app_strings = array(-'ADMIN_MAIL_SUBJECT' => 'Test mail about the mail server configuration.',
+'ADMIN_MAIL_DESCRIPTION1' => 'Test mail about the mail server configuration.',
+'ADMIN_MAIL_DESCRIPTION2' => 'have configured. </b><br>Feel free to delete this mail.<br><br>Thanks and Regards,<br> ',
 'LBL_BROWSER_TITLE' => 'coreBOS',
 'LBL_MY_ACCOUNT' => 'My Organization',
 'LBL_MY_PREFERENCES' => 'My Preferences',
