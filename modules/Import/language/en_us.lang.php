@@ -10,6 +10,8 @@
 
 $mod_strings = array (
 	'Import' => 'Import',
+	'TOP_TRANSLATION_PART' => 'has just completed your import process',
+	'BOTTON_TRANSLATION_PART' => 'We recommend you to login and check a few records to confirm that the import has been successful.',
 	'LBL_IMPORT_STEP_1' => 'Step 1',
 	'LBL_IMPORT_STEP_2' => 'Step 2',
 	'LBL_IMPORT_STEP_3' => 'Step 3',
