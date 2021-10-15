@@ -20,6 +20,8 @@ include_once 'vtlib/Vtiger/Module.php';
 require_once 'include/Webservices/Revise.php';
 require_once 'include/Webservices/Create.php';
 require_once 'include/integrations/mailup/lib/MailUpClient.php';
+require_once 'include/integrations/sendgrid/vendor/autoload.php';
+require_once 'include/events/include.inc';
 require 'vendor/autoload.php';
 
 
@@ -73,17 +75,16 @@ class corebos_mailup {
 		coreBOS_Settings::setSetting(self::USERNAME, $mailup_username);
 		coreBOS_Settings::setSetting(self::PASSWORD, $mailup_password);
 
-		$mailUp = new MailUpClient($this->authData($clientId, $clientSecret));
+		$mailUp = new MailUpClient(self::authData($clientId, $clientSecret));
 		$mailUp->retrieveTokenByPassword($mailup_username, $mailup_password);
 
-		$this->sendEMail($clientId, $clientSecret);
-		// global $adb;
-		// $em = new VTEventsManager($adb);
-		// if (self::useEmailHook()) {
-		// 	$em->registerHandler('corebos.filter.systemEmailClass.getname', 'include/integrations/mailup/Mailup.php', 'corebos_mailup');
-		// } else {
-		// 	$em->unregisterHandler('corebos_mailup');
-		// }
+		global $adb;
+		$em = new VTEventsManager($adb);
+		if (self::useEmailHook()) {
+			$em->registerHandler('corebos.filter.systemEmailClass.getname', 'include/integrations/mailup/Mailup.php', 'corebos_mailup');
+		} else {
+			$em->unregisterHandler('corebos_mailup');
+		}
 	}
 
 	public function getSettings() {
@@ -103,51 +104,148 @@ class corebos_mailup {
 	}
 
 
-	public function sendEMail($clientId, $clientSecret) {
-		// Not format this string, otherwise the server will return 400 error.
-		$message = "<html><body><p>Hello<\\/p><\\/body><\\/html>";
-		$email = '{
-            "Subject": "Test Message Objective-COREBOS cc",
-            "idList": "1",
-            "Content": "' . $message . '",
-            "Embed": true,
-            "IsConfirmation": true,
-            "Fields": [],
-            "Notes": "Some notes",
-            "Tags": [],
-            "TrackingInfo": {
-                "CustomParams": "",
-                "Enabled": true,
-                "Protocols": [
-                    "http"
-                ]
-            }
-        }';
+	public static function sendEMail(
+		$to_email,
+		$from_name,
+		$from_email,
+		$subject,
+		$contents,
+		$cc = '',
+		$bcc = '',
+		$attachment = '',
+		$emailid = '',
+		$logo = '',
+		$replyto = '',
+		$qrScan = '',
+		$brScan = ''
+	) {
+		global $adb, $log;
+		$inBucketServeUrl = GlobalVariable::getVariable('Debug_Email_Send_To_Inbucket', "");
+		if (!empty($inBucketServeUrl)) {
+			require_once 'modules/Emails/mail.php';
+			require_once 'modules/Emails/Emails.php';
+			return send_mail('Email', $to_email, $from_name, $from_email, $subject, $contents, $cc, $bcc, $attachment, $emailid, $logo, $replyto, $qrScan, $brScan);
+		} else {
+			// CREATING MESSAGE
+			$messageId = self::createEmailMessage($subject, $contents, $to_email, $from_name, $from_email);
+			//ATTACHEMENTS
 
-		$mailUp = new MailUpClient($this->authData($clientId, $clientSecret));
+			//SEND
+			$response = self::sendMessage($messageId, $to_email, $from_name, $from_email);
 
-		$result = $mailUp->getResult(
-			"POST",
-			"JSON",
-			$email,
-			"Console",
-			"/Console/List/1/Email",
-			"Create and save \"hello\" message"
-		);
+			return 1;
+		}
 	}
 
-	private function authData($clientId, $clientSecret) {
+	public static function createEmailMessage($subject, $contents, $to_email, $from_name, $from_email) {
+		global $log;
+		if (self::sendVerify($to_email, $from_email)) {
+			$message = array(
+			"Subject" => $subject,
+			"idList" => "1",
+			"Content" => $contents,
+			"Embed" => true,
+			"IsConfirmation" =>true,
+			"Fields" => [],
+			"Notes" => "",
+			"Tags" => [],
+			"TrackingInfo" => array(
+				"CustomParams" => "",
+				"Enabled" => true,
+				"Protocols" => [
+					"http"
+				]
+			)
+			);
+
+			$response = static::mailUpServerCall(json_encode($message), '/Console/List/1/Email');
+			return $response['idMessage'];
+		}
+	}
+
+	private static function sendMessage($messageId, $to_email, $from_name, $from_email) {
+		global $adb,$log;
+		$rs = $adb->pquery('select first_name,last_name from vtiger_users where user_name=?', array($from_name));
+		if ($adb->num_rows($rs) > 0) {
+			$from_name = decode_html($adb->query_result($rs, 0, 'first_name').' '.$adb->query_result($rs, 0, 'last_name'));
+		}
+		if (!is_array($to_email)) {
+			$to_email = trim($to_email, ',');
+			$to_email = explode(',', $to_email);
+		}
+		if (empty($cc)) {
+			$cc = array();
+		}
+		// if (!is_array($cc)) {
+		// 	$cc = self::setSendGridCCAddress($cc);
+		// }
+		// if (empty($bcc)) {
+		// 	$bcc = array();
+		// }
+		// if (!is_array($bcc)) {
+		// 	$bcc = self::setSendGridCCAddress($bcc);
+		// }
+
+		if (self::sendVerify($to_email[0], $from_email)) {
+			$data = array(
+				"Email" => $to_email[0],
+				"idMessage" => $messageId
+			);
+
+			return self::mailUpServerCall(json_encode($data), '/Console/Email/Send');
+		}
+	}
+
+	private static function sendVerify($to_email, $from_email) {
+		return $to_email == $from_email ? 0 : 1;
+	}
+
+	private static function authData($clientId, $clientSecret) {
 		return array(
 			'client_id' => $clientId,
 			'secret_key' => $clientSecret,
-			'callback_url' => $this->callBackUrl()
+			'callback_url' => self::callBackUrl(),
 		);
 	}
 
-	private function callBackUrl() {
+	private static function callBackUrl() {
 		return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']
 			=== 'on' ? "https" : "http") . "://" .
 			$_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
+	}
+
+
+
+	private static function mailUpServerCall($data, $path) {
+		$mailUp = new MailUpClient(self::authData(coreBOS_Settings::getSetting(self::KEY_ACCESSID, ''), coreBOS_Settings::getSetting(self::KEY_ACCESSSECRET, '')));
+		$result = $mailUp->getResult(
+			"POST",
+			"JSON",
+			$data,
+			"Console",
+			$path,
+			"testing"
+		);
+		return $result;
+	}
+
+	public static function emailServerCheck() {
+		return self::useEmailHook();
+	}
+
+	public static function useEmailHook() {
+		global $log;
+		$sendgrid = coreBOS_Settings::getSetting(self::KEY_ISACTIVE, '0');
+		$usetrans = coreBOS_Settings::getSetting(self::KEY_ACCESSID, '0');
+		return ($sendgrid != '0' && $usetrans != '0');
+	}
+
+	public function handleFilter($handlerType, $parameter) {
+		if ($handlerType == 'corebos.filter.systemEmailClass.getname' && corebos_mailup::useEmailHook()) {
+			return array('corebos_mailup', 'include/integrations/mailup/Mailup.php');
+		} else {
+			return $parameter;
+		}
 	}
 }
 ?>
