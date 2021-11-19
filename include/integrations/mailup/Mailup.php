@@ -129,6 +129,7 @@ class corebos_mailup {
 			// CREATING MESSAGE
 			$messageId = self::createEmailMessage($subject, $contents, $to_email, $from_name, $from_email);
 			//ATTACHEMENTS
+			self::addAttachments($messageId, $attachment);
 
 			//SEND
 			$response = self::sendMessage($messageId, $to_email, $from_name, $from_email);
@@ -163,6 +164,58 @@ class corebos_mailup {
 		}
 	}
 
+	public static function addAttachments($messageId, $attachment){
+		global $log;
+		$log->fatal($_REQUEST);
+		$log->fatal($attachment);
+		if (is_array($attachment)) {
+			$atts = $attachment;
+		} else {
+			$atts = getAllAttachments($emailid);
+		}
+		if (isset($_REQUEST['filename_hidden_docu'])) {
+			$file_name = $_REQUEST['filename_hidden_docu'];
+			$atts[]=array('fname'=>$file_name,'fpath'=>$file_name);
+		}
+		if (isset($_REQUEST['filename_hidden_gendoc'])) {
+			$file_name = $_REQUEST['filename_hidden_gendoc'];
+			$atts[]=array('fname'=>$file_name,'fpath'=>$file_name);
+		}
+		if ($logo == 1) {
+			$cmp = retrieveCompanyDetails();
+			$atts[]=array(
+				'fname' => basename($cmp['companylogo']),
+				'fpath' => $cmp['companylogo'],
+				'attachtype' => 'inline',
+				'attachmarker' => 'logo', // '<img src="cid:logo" />',
+			);
+		}
+		preg_match_all('/<img src="cid:(qrcode.*)"/', $contents, $matches);
+		if ($qrScan == 1 || count($matches[1])>0) {
+			foreach ($matches[1] as $qrname) {
+				$atts[]=array(
+					'fname' => $qrname.'.png',
+					'fpath' => 'cache/images/'.$qrname.'.png',
+					'attachtype' => 'inline',
+					'attachmarker' => $qrname, //'<img src="cid:'.$qrname.'" />',
+				);
+			}
+		}
+		preg_match_all('/<img src="cid:(barcode.*)"/', $contents, $matches);
+		if ($brScan == 1 || count($matches[1])>0) {
+			foreach ($matches[1] as $brname) {
+				$atts[]=array(
+					'fname' => $brname.'.png',
+					'fpath' => 'cache/images/'.$brname.'.png',
+					'attachtype' => 'inline',
+					'attachmarker' => $brname, //'<img src="cid:'.$brname.'" />',
+				);
+			}
+		}
+		$log->fatal("check attachment");
+		$log->fatal($atts);
+	}
+
 	private static function sendMessage($messageId, $to_email, $from_name, $from_email) {
 		global $adb,$log;
 		$rs = $adb->pquery('select first_name,last_name from vtiger_users where user_name=?', array($from_name));
@@ -192,7 +245,7 @@ class corebos_mailup {
 				"idMessage" => $messageId
 			);
 
-			return self::mailUpServerCall(json_encode($data), '/Console/Email/Send');
+			return self::mailUpServerCall(json_encode($data), '/Console/Email/Send?SenderName='.$from_name.'&SenderAddress='.$from_email);
 		}
 	}
 
