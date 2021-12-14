@@ -69,3 +69,12 @@ function showMassTag() {
 	document.getElementById('ids').value = document.getElementById('allselectedboxes').value;
 	document.getElementById('masstag').style.display = 'block';
 }
+
+function showGoalSeeker() {
+	if (document.getElementById('allids')!=null && document.getElementById('allselectedboxes').value=='') {
+		alert(alert_arr.SELECT);
+		return;
+	}
+	document.getElementById('goalseekervalueids').value = document.getElementById('allselectedboxes').value;
+	document.getElementById('goalseeker').style.display = 'block';
+}

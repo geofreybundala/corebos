@@ -77,5 +77,6 @@
 </form><br>
 </div>
 {include file='masstag.tpl'}
+{include file='goalSeeker.tpl'}
 {*<!-- Searching UI -->*}
 {/if}

@@ -140,4 +140,11 @@
 	<classname>AddMissingPrimaryIndexes</classname>
 	<systemupdate>true</systemupdate>
 </changeSet>
+<changeSet>
+	<author>geofreybundala</author>
+	<description>Add Goal Seeker button</description>
+	<filename>build/changeSets/2021/addGoalSeekerFunctionality.php</filename>
+	<classname>addGoalSeekerFunctionality</classname>
+	<systemupdate>true</systemupdate>
+</changeSet>
 </updatesChangeLog>

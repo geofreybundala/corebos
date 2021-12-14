@@ -1371,6 +1371,13 @@ $app_strings = array(
 'VALIDATION_FAILED' => 'Validation failed',
 'Select Module To Upsert' => 'Select Module To Upsert',
 'LBL_FIX_NOW' => 'Fix Now',
+'LBL_GOALSEEKER_FORM_HEADER' => 'GoalSeaker Operations',
+'LBL_USE_GOALSEEKER' => 'use',
+'LBL_ROW_GOALSEEKER' => 'as the rows for data set',
+'LBL_LIST_FIELDS' => 'as the value to be solve',
+'LBL_ROW_TO_CHANGE' => 'as row to change',
+'LBL_FORMULA_TO_EVALUATE' => 'as formula to evaluate',
+'LBL_SOLVE_TO_GOAL' => 'solve to this goal',
 
 //login translation
 'LBL_Please_login_to_your_account' => 'Please login to your account',

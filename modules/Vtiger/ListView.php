@@ -7,7 +7,7 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  ************************************************************************************/
-global $app_strings, $mod_strings, $current_language, $currentModule, $theme;
+global $app_strings, $mod_strings, $current_language, $currentModule, $theme,$log;
 $list_max_entries_per_page = GlobalVariable::getVariable('Application_ListView_PageSize', 20, $currentModule);
 require_once 'Smarty_setup.php';
 require_once 'include/ListView/ListView.php';
@@ -232,12 +232,28 @@ if ($sql_error) {
 
 		$listview_header = $controller->getListViewHeader($focus, $currentModule, $url_string, $sorder, $order_by, $skipAction);
 		$listview_entries = $controller->getListViewEntries($focus, $currentModule, $list_result, $navigation_array, $skipAction);
+		//$log->fatal($list_result);
+		$fields = $queryGenerator->getFields();
+		$meta = $queryGenerator->getMeta($queryGenerator->getModule());
+
+		$moduleFields = $meta->getModuleFields();
+		$goalSeekerFields = array();
+		foreach ($moduleFields as $fieldName => $fieldInstance) {
+			// if ( $fieldInstance->getUIType() == 7 || $fieldInstance->getUIType() == 9 ){
+			// 	array_push($goalSeekerFields,$fieldName);
+			// }
+			array_push($goalSeekerFields,$fieldName);
+		}
+
+		$log->fatal($goalSeekerFields);
+
 
 		$listview_header_search = $controller->getBasicSearchFieldInfoList();
 
 		$smarty->assign('LISTHEADER', $listview_header);
 		$smarty->assign('LISTENTITY', $listview_entries);
 		$smarty->assign('SEARCHLISTHEADER', $listview_header_search);
+		$smarty->assign('GOALSEEKERFIELDS',$goalSeekerFields);
 
 	// Module Search
 		$alphabetical = AlphabeticalSearch($currentModule, 'index', $focus->def_basicsearch_col, 'true', 'basic', '', '', '', '', $viewid);
