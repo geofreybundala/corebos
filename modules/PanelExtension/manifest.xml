@@ -1,0 +1,52 @@
+<?xml version='1.0'?>
+<module>
+<name>PanelExtension</name>
+<label>PanelExtension</label>
+<parent>Tools</parent>
+<version>1.0</version>
+<short_description>CRM panel Extension.</short_description>
+<dependencies>
+<vtiger_version>5.4.0</vtiger_version>
+<vtiger_max_version>5.*</vtiger_max_version>
+</dependencies>
+<license>
+<inline><![CDATA[Your license here]]></inline>
+</license>
+<!-- <tables>
+<table>
+<name>vtiger_PanelExtension</name>
+<sql><![CDATA[CREATE TABLE `vtiger_PanelExtension` (
+  `PanelExtensionid` int(11) NOT NULL,
+  `PanelExtension_no` varchar(56) default NULL,
+  ..rest of fields..
+  PRIMARY KEY (`PanelExtensionid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+</table>
+<table>
+<name>vtiger_PanelExtensioncf</name>
+<sql><![CDATA[CREATE TABLE `vtiger_PanelExtensioncf` (
+  `PanelExtensionid` int(11) NOT NULL,
+  PRIMARY KEY (`PanelExtensionid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+</table>
+</tables> -->
+
+
+<sharingaccess>
+<default>private</default>
+</sharingaccess>
+<actions>
+<action>
+<name><![CDATA[Merge]]></name>
+<status>enabled</status>
+</action>
+<action>
+<name><![CDATA[Import]]></name>
+<status>enabled</status>
+</action>
+<action>
+<name><![CDATA[Export]]></name>
+<status>enabled</status>
+</action>
+</actions>
+</module>

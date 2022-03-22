@@ -240,7 +240,7 @@ if (!vtlib_isModuleActive('GlobalVariable')) {
 	vtlib_toggleModuleAccess('GlobalVariable', true); // in case changeset is applied but module deactivated
 }
 if (!vtlib_isModuleActive('evvtMenu')) {
-	$rsup = $adb->query("select cbupdaterid from vtiger_cbupdater where classname='ldMenu'");
+	$rsup = $adb->query("select cbupdaterid from vtiger_cbupdater  classname='ldMenu'");
 	$updid = $adb->query_result($rsup, 0, 0);
 	$_REQUEST['idstring'] = $updid;
 	include 'modules/cbupdater/dowork.php';

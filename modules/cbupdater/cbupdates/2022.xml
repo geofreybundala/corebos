@@ -49,4 +49,11 @@
 	<classname>updateSettingsIcons</classname>
 	<systemupdate>true</systemupdate>
 </changeSet>
+<changeSet>
+	<author>geofreybundala</author>
+	<description>Update Settings Icons</description>
+	<filename>build/changeSets/2022/addPanelExtension.php</filename>
+	<classname>addPanelExtension</classname>
+	<systemupdate>true</systemupdate>
+</changeSet>
 </updatesChangeLog>
