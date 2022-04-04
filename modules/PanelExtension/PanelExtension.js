@@ -1,3 +1,5 @@
+
+
 /*+**********************************************************************************
  * The contents of this file are subject to the vtiger CRM Public License Version 1.0
  * ("License"); You may not use this file except in compliance with the License
@@ -6,33 +8,34 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  ************************************************************************************/
+if (typeof(PanelExtensionCommon) == 'undefined') {
+	var PanelExtensionCommon = {
 
-const searchAcount = () =>{
-    const cercamail = document.getElementById("_cercamail").value;
-    const username = document.getElementById("_username").value;
-    const accountNotfound = true
+		initiateSearch : function (workflowId) {
+            console.log(workflowId)
+			PanelExtensionCommon.searchAcount();
+		},
 
-    console.table({cercamail,username})
-//     jQuery.ajax({
-// 		method: 'POST',
-// 		url: 'index.php?module=PanelExtension&action=PanelExtensionAjax&file=SearchAccount&email='+cercamail+'&username='+username
-// 	}).done(function (response) {
-//         console.log(response)
-// 	});
-        if(accountNotfound){
-                
-        }
+
+		searchAcount : function () {
+            const cercamail = document.getElementById("_cercamail").value;
+            const username = document.getElementById("_username").value;
+            const accountNotfound = true
+        
+            console.table({cercamail,username})
+        
+        //     jQuery.ajax({
+        // 		method: 'POST',
+        // 		url: 'index.php?module=PanelExtension&action=PanelExtensionAjax&file=SearchAccount&email='+cercamail+'&username='+username
+        // 	}).done(function (response) {
+        //         console.log(response)
+        // 	});
+                if(accountNotfound){
+                        
+                }
+		},
+
+	};
 }
 
 
-$(window).load(function () {
-        $(".trigger_popup_fricc").click(function(){
-           $('.hover_bkgr_fricc').show();
-        });
-        $('.hover_bkgr_fricc').click(function(){
-            $('.hover_bkgr_fricc').hide();
-        });
-        $('.popupCloseButton').click(function(){
-            $('.hover_bkgr_fricc').hide();
-        });
-    });
