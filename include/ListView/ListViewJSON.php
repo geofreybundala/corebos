@@ -225,12 +225,15 @@ class GridListView {
 		$isRecycleModule = isset($_REQUEST['isRecycleModule']) ? vtlib_purify($_REQUEST['isRecycleModule']): '';
 		$customView = new CustomView($this->module);
 		$viewid = $customView->getViewId($this->module);
+		$viewinfo = $customView->getCustomViewByCvid($viewid);
+		$statusdetails = $customView->isPermittedChangeStatus($viewinfo['status'], $viewid);
 		$cv = array(
 			'viewid' => $viewid,
-			'viewinfo' => $customView->getCustomViewByCvid($viewid),
+			'viewinfo' => $viewinfo,
 			'edit_permit' => $customView->isPermittedCustomView($viewid, 'EditView', $this->module),
 			'delete_permit' => $customView->isPermittedCustomView($viewid, 'Delete', $this->module),
-			'customview_html' => $customView->getCustomViewCombo($viewid)
+			'customview_html' => $customView->getCustomViewCombo($viewid),
+			'setpublic' => $statusdetails
 		);
 		$queryGenerator = new QueryGenerator($this->module, $current_user);
 		try {
@@ -261,8 +264,12 @@ class GridListView {
 		}
 		$listview_header_search['cblvactioncolumn'] = $app_strings['LBL_ACTION'];
 		$listview_header_arr = array();
+		$findRelatedModule = '';
 		foreach ($listview_header_search as $fName => $fValue) {
 			$fieldType = getUItypeByFieldName($this->module, $fName);
+			if ($fieldType == '10') {
+				$findRelatedModule = $this->findRelatedModule($fName);
+			}
 			$tooltip = ToolTipExists($fName, $this->tabid);
 			if ($fieldType == '15' || $fieldType == '16') {
 				$picklistValues = vtlib_getPicklistValues($fName);
@@ -290,6 +297,15 @@ class GridListView {
 					'tooltip' => $tooltip,
 					'edit' => $edit,
 				);
+			} elseif ($fieldType == '10') {
+				$lv_arr = array(
+					'fieldname' => $fName,
+					'fieldvalue' => html_entity_decode($fValue),
+					'uitype' => $fieldType,
+					'tooltip' => $tooltip,
+					'edit' => $edit,
+					'relatedModule' => $findRelatedModule
+				);
 			} else {
 				$lv_arr = array(
 					'fieldname' => $fName,
@@ -313,14 +329,43 @@ class GridListView {
 		);
 	}
 
+	public function findRelatedModule($fName) {
+		global $adb;
+		$rs = $adb->pquery('select fieldid, tabid from vtiger_field where fieldname=? and tabid=?', array($fName, $this->tabid));
+		$noofrows = $adb->num_rows($rs);
+		if ($noofrows > 0) {
+			$modules = array();
+			for ($i=0; $i < $noofrows; $i++) {
+				$fieldid = $adb->query_result($rs, $i, 'fieldid');
+				$tabid = $adb->query_result($rs, $i, 'tabid');
+				$rel = $adb->pquery('select * from vtiger_fieldmodulerel where fieldid=? and module=?', array(
+					$fieldid, $this->module
+				));
+				$noofrows = $adb->num_rows($rel);
+				if ($noofrows > 0) {
+					for ($j=0; $j<$noofrows; $j++) {
+						$modules[] = $adb->query_result($rel, $j, 'relmodule');
+					}
+				}
+			}
+			return $modules;
+		}
+		return false;
+	}
+
 	public function processResults($result, $field_types, $parentid = 0) {
 		global $adb, $current_user;
 		$Colorizer = false;
+		$ids = array();
 		if (vtlib_isModuleActive('Colorizer')) {
 			$Colorizer = true;
 		}
+		if (isset($_REQUEST['searchFullDocuments']) && !empty($_REQUEST['searchFullDocuments'])) {
+			$ids = $this->SearchFullDocuments($_REQUEST['searchFullDocuments']);
+		}
 		$data = array();
 		$reference_field = getEntityFieldNames($this->module);
+		$columnnameVal = $this->getFieldNameByColumn($reference_field['fieldname']);
 		$rowCount = $adb->num_rows($result);
 		for ($i=0; $i < $rowCount; $i++) {
 			$rows = array();
@@ -425,7 +470,7 @@ class GridListView {
 				$rows['recordid'] = $recordID;
 				$rows['reference_field'] = array(
 					'columnname' => $reference_field['fieldname'],
-					'fieldname' => $this->getFieldNameByColumn($reference_field['fieldname'])
+					'fieldname' => $columnnameVal
 				);
 				$rows['relatedRows'] = $linkRow;
 				if ($this->module == 'Documents') {
@@ -436,6 +481,11 @@ class GridListView {
 				$className = $this->enableColorizer($colorizer_row);
 				$rows['_attributes'] = $className;
 			}
+			if (!$ids && isset($_REQUEST['searchFullDocuments']) && !empty($_REQUEST['searchFullDocuments'])) {
+				continue;
+			} elseif (isset($_REQUEST['searchFullDocuments']) && !empty($_REQUEST['searchFullDocuments']) && is_array($ids) && !in_array($rows['recordid'], $ids)) {
+				continue;
+			}
 			array_push($data, $rows);
 		}
 		return $data;
@@ -443,6 +493,9 @@ class GridListView {
 
 	public function getFieldNameByColumn($columnname) {
 		global $adb;
+		if (is_array($columnname)) {
+			$columnname = $columnname[0];
+		}
 		$rs = $adb->pquery('select fieldname from vtiger_field where columnname=? and tabid=?', array(
 			$columnname, $this->tabid
 		));
@@ -639,7 +692,7 @@ class GridListView {
 		$focus->retrieve_entity_info($recordid, $this->module);
 		$focus->column_fields[$columnName] = $value;
 		$focus->column_fields = DataTransform::sanitizeRetrieveEntityInfo($focus->column_fields, $handlerMeta);
-		$focus->saveentity($this->module);
+		$focus->save($this->module);
 	}
 
 	public function enableColorizer($row) {
@@ -658,8 +711,8 @@ class GridListView {
 				$numOfRows = $adb->num_rows($sql);
 				if ($numOfRows > 0) {
 					for ($i=0; $i < $numOfRows; $i++) {
-						$condition = $adb->query_result($sql, $i, 'condition');
-						$additional = $adb->query_result($sql, $i, 'additional');
+						$condition = html_entity_decode($adb->query_result($sql, $i, 'condition'));
+						$additional = html_entity_decode($adb->query_result($sql, $i, 'additional'));
 						$className = $adb->query_result($sql, $i, 'classname');
 						$additional = json_decode($additional, true);
 						$condition = json_decode($condition, true);
@@ -744,6 +797,7 @@ class GridListView {
 	}
 
 	public function findDocumentFolders() {
+		require_once 'modules/DocumentFolders/DocumentFolders.php';
 		global $current_user, $adb;
 		$focus = new DocumentFolders();
 		$referenceField = 'parentfolder';
@@ -768,6 +822,22 @@ class GridListView {
 			$folders[] = 1;
 		}
 		return $folders;
+	}
+
+	public function SearchFullDocuments($text) {
+		global $adb;
+		$this->DocumentSearch = true;
+		$result = $adb->pquery('select * from vtiger_documentsearchinfo where text LIKE ?', array(
+			'%'.$text.'%'
+		));
+		if ($adb->num_rows($result) > 0) {
+			$ids = array();
+			while ($row = $result->FetchRow()) {
+				$ids[] = $row['documentid'];
+			}
+			return $ids;
+		}
+		return false;
 	}
 }
 ?>

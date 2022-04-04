@@ -250,17 +250,23 @@ $GlobalVariableDefinitons = array(
 	'values' => '0 | 1',
 	'definition' => 'Completely disables or enables webdav access.',
 ),
+'Webservice_LogCallsToQueue' => array(
+	'valuetype' => 'Boolean',
+	'category' => 'Webservice',
+	'values' => '0 | 1',
+	'definition' => 'Disables or enables web service call logging. Logs are put in the queue to be processed',
+),
 'Webservice_Enabled' => array(
 	'valuetype' => 'Boolean',
 	'category' => 'Webservice',
 	'values' => '0 | 1',
-	'definition' => 'Completely disables or enables webservice access.',
+	'definition' => 'Completely disables or enables web service access.',
 ),
 'Webservice_CORS_Enabled_Domains' => array(
 	'valuetype' => 'String',
 	'category' => 'Webservice',
 	'values' => 'CSV of authorized CORS domains',
-	'definition' => 'CSV of URI of domains authorized to access webservice. The special entry asterisk "*" will give access to all domains.',
+	'definition' => 'CSV of URI of domains authorized to access web service. The special entry asterisk "*" will give access to all domains.',
 ),
 'Webservice_Describe_ReturnUserList' => array(
 	'valuetype' => 'Boolean',
@@ -1557,6 +1563,18 @@ $GlobalVariableDefinitons = array(
 	'category' => 'Application',
 	'values' => 'Hour in format HH:MM:SS',
 	'definition' => 'End hour to show in Calendar, by default will be 24:00:00.',
+),
+'Apache_Tika_URL' => array(
+	'valuetype' => 'String',
+	'category' => 'Application',
+	'values' => '',
+	'definition' => 'Set URL where Tika is running',
+),
+'Application_MassAction_Multipage' => array(
+	'valuetype' => 'String',
+	'category' => 'Application',
+	'values' => '0 | 1',
+	'definition' => 'Define if we want to mass edit records that we select on many pages or allow us only to mass edit only on the page we are.',
 ),
 );
 

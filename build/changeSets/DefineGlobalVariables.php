@@ -168,6 +168,7 @@ class DefineGlobalVariables extends cbupdaterWorker {
 				'Webservice_Sync_RecordLimitStreaming',
 				'Webservice_GenDocConversion_Active',
 				'Webservice_Return_FormattedValues',
+				'Webservice_LogCallsToQueue',
 				'SOAP_CustomerPortal_Enabled',
 				'SOAP_Outlook_Enabled',
 				'WEBDAV_Enabled',
@@ -290,7 +291,9 @@ class DefineGlobalVariables extends cbupdaterWorker {
 				'Security_ImageCheck',
 				'MasterDetail_ReloadScreenAfterEdit',
 				'MasterDetail_Pagination',
-				'Import_ForceDuplicateRecord_Handling'
+				'Import_ForceDuplicateRecord_Handling',
+				'Apache_Tika_URL',
+				'Application_MassAction_Multipage',
 			);
 			$delete_these = array(
 				'preload_prototype',

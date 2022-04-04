@@ -1558,6 +1558,18 @@ $GlobalVariableDefinitons = array(
 	'values' => 'Hour in format HH:MM:SS',
 	'definition' => 'End hour to show in Calendar, by default will be 24:00:00.',
 ),
+'Apache_Tika_URL' => array(
+	'valuetype' => 'String',
+	'category' => 'Application',
+	'values' => '',
+	'definition' => 'Set URL where Tika is running',
+),
+'Application_MassAction_Multipage' => array(
+	'valuetype' => 'String',
+	'category' => 'Application',
+	'values' => '0 | 1',
+	'definition' => 'Define if we want to mass edit records that we select on many pages or allow us only to mass edit only on the page we are.',
+),
 );
 
 foreach (glob('modules/GlobalVariable/language/fr_fr.gvdefs.*.php', GLOB_BRACE) as $tcode) {

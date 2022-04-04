@@ -34,9 +34,16 @@ class RunWebserviceWorkflowTask extends VTTask {
 		$mapid = $this->bmapid;
 		$cbMap = cbMap::getMapByID($mapid);
 
-		$focus2 = CRMEntity::getInstance($origin_module);
-		$focus2->retrieve_entity_info($therecid, $origin_module);
-		$target_fields = $cbMap->WebserviceMapping($focus2->column_fields, $entity->WorkflowContext);
+		$WSCall_ReturnResultWithNoSave = isset($entity->WorkflowContext['WSCall_ReturnResultWithNoSave']);
+		unset($entity->WorkflowContext['WSCall_ReturnResultWithNoSave']);
+		if (empty($therecid)) {
+			$mergewith = [];
+		} else {
+			$focus2 = CRMEntity::getInstance($origin_module);
+			$focus2->retrieve_entity_info($therecid, $origin_module);
+			$mergewith = $focus2->column_fields;
+		}
+		$target_fields = $cbMap->WebserviceMapping($mergewith, $entity->WorkflowContext);
 
 		$wsconfig = $target_fields['WSConfig'];
 		$url = $this->substituteSetting($wsconfig['wsurl']);
@@ -136,6 +143,10 @@ class RunWebserviceWorkflowTask extends VTTask {
 				$conds = array();
 				if ($outputtype == 'JSON') {
 					foreach ($target_fields['Response'] as $fld => $v) {
+						if ($fld == '.') { // they are asking for the full result
+							$entity->WorkflowContext[$v['context']] = $conds[$v['field']] = $respp;
+							continue;
+						}
 						$r2 = '';
 						if (is_array($response2)) {
 							if (strpos($fld, '.')) {
@@ -168,6 +179,10 @@ class RunWebserviceWorkflowTask extends VTTask {
 					$json = json_encode($xml);
 					$response2 = json_decode($json, true);
 					foreach ($target_fields['Response'] as $fld => $v) {
+						if ($fld == '.') { // they are asking for the full result
+							$entity->WorkflowContext[$v['context']] = $conds[$v['field']] = $respp;
+							continue;
+						}
 						if (strpos($fld, '.')) {
 							list ($elemresponse, $elemfield) = explode('.', $fld);
 							if (is_array($response2[$elemresponse])) {
@@ -187,7 +202,7 @@ class RunWebserviceWorkflowTask extends VTTask {
 						$entity->WorkflowContext[$v['context']] = $r2;
 					}
 				}
-				if (!empty($conds)) {
+				if (!empty($conds) && !$WSCall_ReturnResultWithNoSave) {
 					$q = $adb->pquery('select * from vtiger_entityname where modulename=?', array($origin_module));
 					$table = $adb->query_result($q, 0, 'tablename');
 					$id = $adb->query_result($q, 0, 'entityidfield');
@@ -309,7 +324,7 @@ class RunWebserviceWorkflowTask extends VTTask {
 						}
 						$entity->WorkflowContext[$v['context']] = $r2;
 					}
-					if (!empty($conds)) {
+					if (!empty($conds) && !$WSCall_ReturnResultWithNoSave) {
 						$q = $adb->pquery('select * from vtiger_entityname where modulename=?', array($origin_module));
 						$table = $adb->query_result($q, 0, 'tablename');
 						$id = $adb->query_result($q, 0, 'entityidfield');
@@ -341,6 +356,9 @@ class RunWebserviceWorkflowTask extends VTTask {
 
 		$util->revertUser();
 		$logbg->debug('< RunWebservice');
+		if ($WSCall_ReturnResultWithNoSave) {
+			return $conds;
+		}
 	}
 
 	public function substituteSetting($url) {

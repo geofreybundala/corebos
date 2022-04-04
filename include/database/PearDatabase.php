@@ -224,7 +224,7 @@ class PearDatabase {
 	}
 
 	public function getDataSourceName() {
-		return 	$this->dbType. '://'.$this->userName.':'.$this->userPassword.'@'. $this->dbHostName . '/'. $this->dbName;
+		return $this->dbType. '://'.$this->userName.':'.$this->userPassword.'@'. $this->dbHostName . '/'. $this->dbName;
 	}
 
 	public function startTransaction() {
@@ -566,11 +566,10 @@ class PearDatabase {
 	}
 
 	public function getFieldsArray(&$result) {
-		$field_array = array();
-		if (! isset($result) || empty($result)) {
+		if (!isset($result) || empty($result)) {
 			return 0;
 		}
-
+		$field_array = array();
 		$i = 0;
 		$n = $result->FieldCount();
 		while ($i < $n) {
@@ -1024,19 +1023,16 @@ class PearDatabase {
 		$this->println('DB alterTableTable table='.$tablename.' flds='.$flds.' oper='.$oper);
 		$this->checkConnection();
 		$dict = NewDataDictionary($this->database);
-
 		if ($oper == 'Add_Column') {
 			$sqlarray = $dict->AddColumnSQL($tablename, $flds);
 		} elseif ($oper == 'Delete_Column') {
 			$sqlarray = $dict->DropColumnSQL($tablename, $flds);
 		}
-		$this->println('sqlarray');
-		$this->println($sqlarray);
-
-		$result = $dict->ExecuteSQLArray($sqlarray);
-
-		$this->println('DB alterTableTable table='.$tablename.' flds='.$flds.' oper='.$oper.' status='.$result);
-		return $result;
+		if (!empty($sqlarray)) {
+			$this->println($sqlarray);
+			return $dict->ExecuteSQLArray($sqlarray);
+		}
+		return false;
 	}
 
 	public function getColumnNames($tablename) {

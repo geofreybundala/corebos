@@ -139,7 +139,8 @@ function vtws_getEntityName($entityId) {
 
 function vtws_getWSID($id) {
 	if (strlen($id)==40) {
-		return CRMEntity::getWSIDfromUUID($id);
+		$return = CRMEntity::getWSIDfromUUID($id);
+		return ($return=='' ? '0x0' : $return);
 	} elseif (preg_match('/^[0-9]+x[0-9]+$/', $id)) {
 		return $id;
 	} elseif (is_numeric($id)) {
@@ -185,6 +186,18 @@ function vtws_getParameter($parameterArray, $paramName, $default = null) {
 		$param = $default;
 	}
 	return $param;
+}
+
+function vtws_logcalls($input) {
+	global $current_user, $application_unique_key;
+	if (GlobalVariable::getVariable('Webservice_LogCallsToQueue', '')!='') {
+		$appname = GlobalVariable::getVariable('Application_Unique_Identifier', $application_unique_key);
+		$input['application'] = $appname;
+		$input['donefrom'] = $_SERVER['REMOTE_ADDR'];
+		unset($input['sessionName']);
+		$cbmq = coreBOS_MQTM::getInstance();
+		$cbmq->sendMessage('WebServiceLogCalls', 'logwscall', 'logwscall', 'WSCall', '1:M', 1, 172800, 0, $current_user->id, json_encode($input));
+	}
 }
 
 function vtws_getEntityNameFields($moduleName) {

@@ -250,17 +250,23 @@ $GlobalVariableDefinitons = array(
 	'values' => '0 | 1',
 	'definition' => 'Habilita o Deshabilita el acceso al servicio de WebDav.',
 ),
+'Webservice_LogCallsToQueue' => array(
+	'valuetype' => 'Booleano',
+	'category' => 'Webservice',
+	'values' => '0 | 1',
+	'definition' => 'Deshabilita o habilita el registro de llamadas del servicio web. Los registros se colocan en la cola para ser procesados',
+),
 'Webservice_Enabled' => array(
 	'valuetype' => 'Booleano',
 	'category' => 'Webservice',
 	'values' => '0 | 1',
-	'definition' => 'Habilita o Deshabilita el acceso al servicio de webservice.',
+	'definition' => 'Habilita o Deshabilita el acceso al servicio de web service.',
 ),
 'Webservice_CORS_Enabled_Domains' => array(
 	'valuetype' => 'Texto',
 	'category' => 'Webservice',
 	'values' => 'CSV of authorized CORS domains',
-	'definition' => 'CSV de URI de dominios autorizados a acceder al servicio webservice. El valor especial asterisco "*" dará acceso a cualquier dominio.',
+	'definition' => 'CSV de URI de dominios autorizados a acceder al servicio web service. El valor especial asterisco "*" dará acceso a cualquier dominio.',
 ),
 'Webservice_Describe_ReturnUserList' => array(
 	'valuetype' => 'Booleano',
@@ -1557,6 +1563,18 @@ $GlobalVariableDefinitons = array(
 	'category' => 'Aplicación',
 	'values' => 'Hora en formato HH:MM:SS',
 	'definition' => 'Hora de finalización que mostrará el calendario, por defecto será 24:00:00.',
+),
+'Apache_Tika_URL' => array(
+	'valuetype' => 'Cadena',
+	'category' => 'Aplicación',
+	'values' => '',
+	'definition' => 'Indica la URL donde Apache Tika está operando',
+),
+'Application_MassAction_Multipage' => array(
+	'valuetype' => 'Cadena',
+	'category' => 'Aplicación',
+	'values' => '0 | 1',
+	'definition' => 'Definir si queremos editar en masa registros que seleccionamos en muchas páginas o solo editar en masa la página en la que estamos.',
 ),
 );
 

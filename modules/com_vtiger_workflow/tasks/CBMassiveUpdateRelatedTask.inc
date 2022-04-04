@@ -28,6 +28,7 @@ class CBMassiveUpdateRelatedTask extends VTTask {
 		$util->adminUser();
 		$isqueue=$entity->isqueue;
 		$moduleName = $entity->getModuleName();
+		$holdCM = $currentModule;
 		if (empty($currentModule) || $currentModule!=$moduleName) {
 			$currentModule = $moduleName;
 		}
@@ -120,7 +121,9 @@ class CBMassiveUpdateRelatedTask extends VTTask {
 				$relationInfo = $adb->fetch_array($relationResult);
 				$params = array($recordId, $rectabid, $relatedModuleId);
 				$logbg->debug(['rel func' => $relationInfo['name'], 'params' => $params]);
-				$holdCM = $currentModule;
+				if (empty($holdCM)) {
+					$holdCM = $currentModule;
+				}
 				$currentModule = $moduleName;
 				$relationData = call_user_func_array(array($focus, $relationInfo['name']), array_values($params));
 				$GetRelatedList_ReturnOnlyQuery = $holdValue;
