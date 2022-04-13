@@ -294,6 +294,8 @@ function __cb_getfieldsof($arr) {
 }
 
 function __cb_getfromcontext($arr) {
+	global $log;
+	$log->fatal($arr);
 	$str_arr = explode(',', $arr[0]);
 	$variableArr = array();
 	foreach ($str_arr as $vname) {
@@ -306,8 +308,10 @@ function __cb_getfromcontext($arr) {
 		}
 	}
 	if (count($variableArr)==1) {
+		$log->fatal($variableArr[$arr[0]]);
 		return $variableArr[$arr[0]];
 	} else {
+		$log->fatal($variableArr);
 		return json_encode($variableArr);
 	}
 }

@@ -1,4 +1,4 @@
-
+<script type="text/javascript" src="modules/PanelExtension/PanelExtension.js"></script>
 <br>
 <section class="slds-card slds-m-left_x-large slds-m-right_x-large slds-m-bottom_x-large slds-p-around_small">
 <div id="page-header-surplus"> 
@@ -18,7 +18,6 @@
  </div> 
  </div> 
  </div>
-
 
 <table width="100%" border="0"  cellspacing="0" align="center">
    <tr>

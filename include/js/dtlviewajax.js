@@ -17,6 +17,7 @@ var clipcopyGenDoc=false;
 var globaltempvalue = '';
 var globaluitype = '';
 
+
 document.addEventListener('DOMContentLoaded', function () {
 	GlobalVariable_getVariable('GenDoc_CopyLabelToClipboard', 0, '', gVTUserID).then(function (response) {
 		var obj = JSON.parse(response);

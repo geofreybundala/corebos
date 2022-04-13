@@ -8,34 +8,27 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  ************************************************************************************/
-if (typeof(PanelExtensionCommon) == 'undefined') {
-	var PanelExtensionCommon = {
-
-		initiateSearch : function (workflowId) {
-            console.log(workflowId)
-			PanelExtensionCommon.searchAcount();
-		},
 
 
-		searchAcount : function () {
+
+    function searchAcount() {
             const cercamail = document.getElementById("_cercamail").value;
             const username = document.getElementById("_username").value;
-            const accountNotfound = true
         
             console.table({cercamail,username})
-        
-        //     jQuery.ajax({
-        // 		method: 'POST',
-        // 		url: 'index.php?module=PanelExtension&action=PanelExtensionAjax&file=SearchAccount&email='+cercamail+'&username='+username
-        // 	}).done(function (response) {
-        //         console.log(response)
-        // 	});
-                if(accountNotfound){
-                        
-                }
-		},
+            jQuery.ajax({
+                url: 'index.php?module=PanelExtension&action=PanelExtensionAjax&file=WebServiceMapCall&__module=PanelExtension&__crmid=0',
+                type:'get'
+            }).fail(function (jqXHR, textStatus) {
+                //fails
+            }).done(function (response) {
+                console.log(response)
 
-	};
-}
+            });
+            return void(0);
+            return false;
+		}
+
+
 
 

@@ -1381,10 +1381,12 @@ function runBAScript(scripturi) {
 	if (cbrec) {
 		SVRecord = cbrec.value;
 	}
+	console.log(scripturi+'&__module='+SVModule+'&__crmid='+SVRecord)
 	jQuery.ajax({
 		url: scripturi+'&__module='+SVModule+'&__crmid='+SVRecord,
 		type:'get'
 	}).fail(function (jqXHR, textStatus) {
+		console.log(textStatus)
 		document.getElementById('appnotifydiv').innerHTML='</b>'+alert_arr.Error+'</b>';
 		document.getElementById('appnotifydiv').style.display='block';
 		VtigerJS_DialogBox.unblock();
@@ -1410,8 +1412,10 @@ function runBAScript(scripturi) {
 				VtigerJS_DialogBox.unblock();
 			}
 		} else { //Error
-			ldsPrompt.show(alert_arr['ERROR'], msg);
-			VtigerJS_DialogBox.unblock();
+			console.log(msg)
+			return msg
+			//ldsPrompt.show(alert_arr['ERROR'], msg);
+			//VtigerJS_DialogBox.unblock();
 		}
 	});
 	return void(0);
