@@ -59,6 +59,16 @@ function wfExportList() {
 	gotourl(url);
 }
 
+function wfDuplicate(workflow_id) {
+	let url = 'index.php?module=com_vtiger_workflow&action=com_vtiger_workflowAjax&file=duplicateWorkflow&functiontocall=duplicateWF&workflow_id='+workflow_id;
+		jQuery.ajax({
+			method: 'GET',
+			url: url
+		}).done(function (response) {
+			console.log(response);
+		});
+}
+
 function wfDeleteList() {
 	wfDoWorkList(i18nWorkflowActions.WORKFLOW_DELETE_CONFIRMATION, i18nWorkflowActions.LBL_DELETE_WORKFLOW, 'deleteworkflow');
 }
