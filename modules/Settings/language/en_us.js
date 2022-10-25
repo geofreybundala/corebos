@@ -92,5 +92,13 @@ var mod_alert_arr = {
 	'massedit': 'MassEditable',
 	'blockslist': 'Blocks',
 	'generatedtype': 'Generated type',
-	'fieldlength': 'Length'
+	'fieldlength': 'Length',
+	
+	'modulename': 'Module Name',
+	'moduletype': 'Module type',
+	'upgrade': 'upgrade',
+	'export': 'export',
+	'settings': 'settings',
+	'enable': 'enable',
+	'disable':'disable',
 };
