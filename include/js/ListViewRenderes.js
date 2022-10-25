@@ -128,7 +128,7 @@ class LinkRender {
 				edit_query_string = ListView.encodeQueryData(edit_query);
 				el.href = `index.php?${edit_query_string}`;
 			} else {
-				let fieldType = props.grid.getValue(rowKey, 'uitype_'+columnName);
+				let fieldType = props.grid.getValue(rowKey, 'uitype_' + columnName);
 				let fieldValue = props.grid.getValue(rowKey, columnName);
 				if (fieldType == '17') {
 					el = document.createElement('a');
@@ -310,7 +310,7 @@ class UIType10Editor {
 }
 
 function CloseUIType10Editor(id, fieldname) {
-	let lastPage = sessionStorage.getItem(gVTModule+'_lastPage');
+	let lastPage = sessionStorage.getItem(gVTModule + '_lastPage');
 	document.getElementById(`popover-${id}-${fieldname}`).remove();
 	ListView.Action = 'inlineedit';
 	ListView.Reload(lastPage);
@@ -321,4 +321,279 @@ function openUIype10Modal(id, fieldname, relatedModule = '') {
 		relatedModule = document.getElementById(`${fieldname}_type_${id}`).value;
 	}
 	window.open(`index.php?module=${relatedModule}&action=Popup&html=Popup_picker&form=ListView&forfield=${fieldname}&srcmodule=${gVTModule}&forrecord=${id}`, 'vtlibui10', cbPopupWindowSettings);
+}
+
+class ModuleMActionRender {
+
+	constructor(props) {
+		let rowKey = props.rowKey;
+		let el = document.createElement('span');
+		const { type } = props.columnInfo.renderer.options;
+		let actions = '';
+
+		switch (type) {
+			case 'ModuleManager':
+				const moduletype = props.grid.getValue(rowKey, 'Module Type');
+				const modulename = props.grid.getValue(rowKey, 'Module Name');
+				let presence = 0;
+				let hassettings = false;
+				let coreBOSOnDemandActive = false;
+				let prefix="";
+				let id = "";
+				let label="";
+				let active=false;
+				var url = `index.php?module=Settings&action=SettingsAjax&file=getJSON&functiontocall=getModuleRecord&modulename=` + modulename + `&moduletype=`+moduletype +``;
+				jQuery.ajax({
+					method: 'GET',
+					url: url,
+				}).done(function (response) {
+					const result = JSON.parse(response);
+					console.log(result);
+					if (result.tablename == 'vtiger_tab') {
+						presence = result.presence;
+						hassettings = result.hassettings;
+						coreBOSOnDemandActive = result.coreBOSOnDemandActive;
+					}else{
+						id = result.id;
+						prefix = result.prefix;
+						label = result.label
+						active = result.active
+						coreBOSOnDemandActive = result.coreBOSOnDemandActive;
+					}
+
+					moduleManagerActionUI(modulename,moduletype,presence, coreBOSOnDemandActive, hassettings, id, prefix,label, active);
+					el.innerHTML = actions;
+					this.el = el;
+				});
+
+				moduleManagerActionUI(modulename,moduletype,presence, coreBOSOnDemandActive,hassettings, id, prefix,label,active);
+				break;
+
+			default:
+				actions = ``;
+				break;
+		}
+		el.innerHTML = actions;
+		this.el = el;
+		this.render(props);
+		
+		function moduleManagerActionUI(modulename,moduletype,presence, coreBOSOnDemandActive, hassettings, id, prefix,label, active ){
+
+			actions = ''
+			if (moduletype == 'CUSTOMIZED') {
+				if(!coreBOSOnDemandActive){
+					actions+= `
+					<button
+					class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+					aria-haspopup="true"
+					title="${mod_alert_arr.upgrade}"
+					onclick="window.location.href='index.php?module=Settings&action=ModuleManager&module_update=Step1&src_module=`+ modulename + `'">
+					<svg class="slds-button__icon" aria-hidden="true">
+						<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#level_up"></use>
+					</svg>
+				</button>
+					`;
+				}
+
+				if(modulename === 'Home'){
+					actions +=`<button
+					class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+					aria-haspopup="true">
+					<svg class="slds-button__icon" aria-hidden="true">
+						<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#home"></use>
+					</svg>
+				</button>`
+				}else if (!coreBOSOnDemandActive) {
+					actions +=`<button
+					class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+					aria-haspopup="true"
+					title="${mod_alert_arr.export}"
+					onclick="window.location.href='index.php?modules=Settings&action=ModuleManagerExport&module_export=`+ modulename + `'"
+					>
+					<svg class="slds-button__icon" aria-hidden="true">
+						<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#share"></use>
+					</svg>
+				</button>`
+				}
+
+				if (presence == 0 && hassettings) {
+					actions += `
+					<button
+						class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+						aria-haspopup="true"
+						title="${mod_alert_arr.settings}"
+						onclick="window.location.href='index.php?module=Settings&action=ModuleManager&module_settings=true&formodule=`+ modulename + `'">
+						<svg class="slds-button__icon" aria-hidden="true">
+							<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#settings"></use>
+						</svg>
+					</button>
+					`; 
+				}
+
+				if (presence == 0) {
+					actions += `
+					<button
+					class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+					aria-haspopup="true"
+					title="${mod_alert_arr.disable}"
+					onclick="vtlib_toggleModule('`+ modulename + `', 'module_disable');">
+					<svg class="slds-button__icon slds-icon-text-success" aria-hidden="true">
+						<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#check"></use>
+					</svg>
+				</button>
+					`
+				} else {
+					actions += `
+				<button
+				class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+				aria-haspopup="true"
+				title="${mod_alert_arr.enable}"
+				onclick="vtlib_toggleModule('`+ modulename + `', 'module_enable');">
+						<svg class="slds-button__icon  slds-icon-text-warning" aria-hidden="true">
+							<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+						</svg>
+				</button>`
+				}
+
+
+				actions +=`<button
+				class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+				aria-haspopup="true"
+				title="${alert_arr['JSLBL_Delete']}"
+				onclick="deleteModule('`+ modulename + `');">
+				<svg class="slds-button__icon slds-icon-text-error" aria-hidden="true">
+					<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#delete"></use>
+				</svg>
+			</button>`;
+
+			} else if (moduletype == 'STANDARD') {
+				if (presence == 0) {
+					actions += `
+					<button
+					class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+					aria-haspopup="true"
+					title="${mod_alert_arr.disable}"
+					onclick="vtlib_toggleModule('`+ modulename + `', 'module_disable');">
+					<svg class="slds-button__icon  slds-icon-text-success" aria-hidden="true">
+						<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#check"></use>
+					</svg>
+				</button>
+					`
+				} else {
+					actions += `
+				<button
+				class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+				aria-haspopup="true"
+				title="${mod_alert_arr.enable}"
+				onclick="vtlib_toggleModule('`+ modulename + `', 'module_enable');">
+						<svg class="slds-button__icon  slds-icon-text-warning" aria-hidden="true">
+							<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+						</svg>
+				</button>`
+				}
+			
+				if (presence == 0 && hassettings) {
+					actions += `
+					<button
+						class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+						aria-haspopup="true"
+						title="${mod_alert_arr.settings}"
+						onclick="window.location.href='index.php?module=Settings&action=ModuleManager&module_settings=true&formodule=`+ modulename + `'">
+						<svg class="slds-button__icon" aria-hidden="true">
+							<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#settings"></use>
+						</svg>
+					</button>
+					`; 
+				}
+			} else {
+				if(!coreBOSOnDemandActive){
+					actions+= `
+					<button
+					class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+					aria-haspopup="true"
+					title="${mod_alert_arr.upgrade}"
+					onclick="window.location.href='index.php?module=Settings&action=ModuleManager&module_update=Step1&src_module=`+ modulename + `'">
+					<svg class="slds-button__icon" aria-hidden="true">
+						<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#level_up"></use>
+					</svg>
+				</button>
+					`;
+				}
+
+				if(prefix !== 'en_us'){
+					if (active) {
+						actions += `
+						<button
+						class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+						aria-haspopup="true"
+						title="${mod_alert_arr.disable}"
+						onclick="vtlib_toggleModule('`+ prefix + `', 'module_enable','language');">
+						<svg class="slds-button__icon  slds-icon-text-success" aria-hidden="true">
+							<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#check"></use>
+						</svg>
+					</button>
+						`
+					}else{
+						actions += `
+						<button
+						class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+						aria-haspopup="true"
+						title="${mod_alert_arr.enable}"
+						onclick="vtlib_toggleModule('`+ prefix + `', 'module_enable', 'language');">
+						<svg class="slds-button__icon  slds-icon-text-success" aria-hidden="true">
+							<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#check"></use>
+						</svg>
+					</button>
+						`
+					}
+				}else{
+					actions += `
+					<button
+					class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+					aria-haspopup="true">
+					<svg class="slds-button__icon slds-icon-text-success" aria-hidden="true">
+						<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#check"></use>
+					</svg>
+				</button>
+					`
+				}
+
+				if (!coreBOSOnDemandActive) {
+					actions +=`<button
+					class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+					aria-haspopup="true"
+					title="${mod_alert_arr.export}"
+					onclick="window.location.href='index.php?modules=Settings&action=ModuleManagerExport&module_export=`+ prefix + `'"
+					>
+					<svg class="slds-button__icon" aria-hidden="true">
+						<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#share"></use>
+					</svg>
+				</button>`
+				}
+
+				actions += `
+				<button
+					class="slds-button slds-button_icon slds-button_icon-border-filled listview-actions-opener"
+					aria-haspopup="true"
+					title="${mod_alert_arr.settings}"
+					onclick="window.location.href='index.php?module=Settings&action=LanguageEdit&languageid=`+ id + `'">
+					<svg class="slds-button__icon" aria-hidden="true">
+						<use xlink:href="include/LD/assets/icons/utility-sprite/svg/symbols.svg#settings"></use>
+					</svg>
+				</button>
+				`; 
+			
+			}
+
+			//return actions;
+		}
+	}
+
+	getElement() {
+		return this.el;
+	}
+
+	render(props) {
+		this.el.value = String(props.value);
+	}
 }
