@@ -97,6 +97,10 @@ function stripTailCommandsFromQuery($query, $stripgroup = true) {
 	if (strripos($query, ' LIMIT ') > 0) {
 		$query = substr($query, 0, strripos($query, ' LIMIT '));
 	}
+
+	if (strripos($query, ' UNION ALL ') > 0) {
+		$query = substr($query, 0, strripos($query, ' UNION ALL '));
+	}
 	return $query;
 }
 
