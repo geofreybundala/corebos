@@ -112,3 +112,66 @@ function freezeBackground() {
 	document.getElementById('confId').style.display = 'block';
 	hideSelect();
 }
+
+
+
+var Grid = tui.Grid;
+var gridInstance = {};
+document.addEventListener('DOMContentLoaded', function (event) {
+	loadJS('index.php?module=Settings&action=SettingsAjax&file=getjslanguage')
+		.then(() => {
+			gridInstance = new Grid({
+				el: document.getElementById('mmgrid'),
+				columns: [{
+					name: 'Module Name',
+					header: mod_alert_arr.name,
+					sortingType: 'desc',
+					sortable: true
+				},
+				{
+					name: 'Module Type',
+					header: mod_alert_arr.moduletype,
+					whiteSpace: 'normal',
+					sortingType: 'desc',
+					sortable: true
+				},
+				{
+					name: 'action',
+					header: mod_alert_arr.action,
+					renderer: {
+						type: ModuleMActionRender,
+						options: {
+							type: 'ModuleManager'
+						}
+					},
+				}
+				],
+				data: {
+					api: {
+						readData: {
+							url: 'index.php?module=Settings&action=SettingsAjax&file=getJSON',
+							method: 'GET',
+						}
+					}
+				},
+				useClientSort: false,
+				rowHeight: 'auto',
+				scrollX: false,
+				scrollY: true,
+				columnOptions: {
+					resizable: true
+				},
+				header: {
+					align: 'left',
+					valign: 'top'
+				}
+			});
+			tui.Grid.applyTheme('striped');
+		});
+});
+
+
+function reloadgriddata() {
+	gridInstance.setRequestParams({'action_search': document.getElementById('action_search').value});
+	gridInstance.reloadData();
+}
